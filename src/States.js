@@ -95,7 +95,7 @@ const States = () => {
       {/* Display Selection */}
       {selectedCity && selectedState && selectedCountry && (
         <h4>
-          You have selected <span className="">{selectedCity}</span> , {selectedState}, {selectedCountry}
+          You Selected <span className="">{selectedCity}</span> , {selectedState}, {selectedCountry}
         </h4>
       )}
     </div>
