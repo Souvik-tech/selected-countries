@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 
 const States = () => {
   const [countries, setCountries] = useState([]); // List of countries
   const [selectedCountry, setSelectedCountry] = useState(""); // Selected country
   const [states, setStates] = useState([]); // List of states for the selected country
-  const [selectedState, setSelectedState] = useState(""); // Selected State
-  const [city, setCity] = useState([]); 
-  const [selectCity,setSelectedCity] = useState("")
+  const [selectedState, setSelectedState] = useState(""); // Selected state
+  const [cities, setCities] = useState([]); // List of cities for the selected state
+  const [selectedCity, setSelectedCity] = useState(""); // Selected city
 
   useEffect(() => {
     // Fetch list of countries
@@ -17,7 +17,13 @@ const States = () => {
   }, []);
 
   useEffect(() => {
-    // Fetch list of states for the selected country when selectedCountry changes
+    // Reset states and cities when selectedCountry changes
+    setStates([]);
+    setSelectedState("");
+    setCities([]);
+    setSelectedCity("");
+
+    // Fetch list of states for the selected country
     if (selectedCountry) {
       fetch(`https://crio-location-selector.onrender.com/country=${selectedCountry}/states`)
         .then((res) => res.json())
@@ -25,28 +31,29 @@ const States = () => {
         .catch((err) => console.error("Error fetching states:", err));
     }
   }, [selectedCountry]);
+
   useEffect(() => {
-    // Fetch list of states for the selected country when selectedCountry changes
-    if (selectedCountry) {
-      fetch(`https://crio-location-selector.onrender.com/country=${selectedCountry}/states`)
-        .then((res) => res.json())
-        .then((val) => setStates(val))
-        .catch((err) => console.error("Error fetching states:", err));
+    // Reset cities when selectedState changes
+    setCities([]);
+    setSelectedCity("");
+
+    // Fetch list of cities for the selected state
+    if (selectedState && selectedCountry) {
+      fetch(
+        `https://crio-location-selector.onrender.com/country=${selectedCountry}/state=${selectedState}/cities`
+      )
+      .then((res) => res.json())
+      .then((val) => {
+        console.log("Fetched cities:", val);
+        setCities(val);
+      })
+        .catch((err) => console.error("Error fetching cities:", err));
     }
-  }, [selectedCountry]);
-  useEffect(() => {
-    // Fetch list of states for the selected country when selectedCountry changes
-    if (selectedCountry ) {
-      fetch(`https://crio-location-selector.onrender.com/country=${selectedCountry}/state=${selectedState}/cities`)
-        .then((res) => res.json())
-        .then((val) => setCity(val))
-        .catch((err) => console.error("Error fetching states:", err));
-    }
-  }, [selectedCountry,selectedState]);
+  }, [ selectedState]);
 
   return (
     <div>
-        <h2>Select A Location</h2>
+      {/* Country Selector */}
       <select
         value={selectedCountry}
         onChange={(e) => setSelectedCountry(e.target.value)}
@@ -59,31 +66,38 @@ const States = () => {
         ))}
       </select>
 
-      <select value={selectedState} onChange={(e)=> setSelectedState(e.target.value)}>
-        <option >Select a state</option>
+      {/* State Selector */}
+      <select
+        value={selectedState}
+        onChange={(e) => setSelectedState(e.target.value)}
+      >
+        <option value="">Select a state</option>
         {states.map((state) => (
           <option key={state} value={state}>
             {state}
           </option>
         ))}
       </select>
-      <select value={selectCity} onChange={(e)=> setSelectedCity(e.target.value)}>
-        <option>Select a City</option>
-        {city.map((state) => (
-          <option key={state} value={state}>
-            {state}
+
+      {/* City Selector */}
+      <select
+        value={selectedCity}
+        onChange={(e) => setSelectedCity(e.target.value)}
+      >
+        <option value="">Select a city</option>
+        {cities.map((city) => (
+          <option key={city} value={city}>
+            {city}
           </option>
         ))}
       </select>
 
-            <div>
-        {selectCity && selectedCountry && selectedState ? (
-            <h4>
-            You have selected {selectCity}, {selectedState}, {selectedCountry}
-            </h4>
-        ) : null}
-</div>
-
+      {/* Display Selection */}
+      {selectedCity && selectedState && selectedCountry && (
+        <h4>
+          You have selected <span className="">{selectedCity}</span> , {selectedState}, {selectedCountry}
+        </h4>
+      )}
     </div>
   );
 };
